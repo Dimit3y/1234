@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="menu">
+    <h2>Комнаты</h2>
+    <div id="rooms"></div>
+    <button onclick="createRoom()">Создать комнату</button>
+</div>
+
+<div id="game" style="display:none;">
+    <canvas id="board" width="350" height="350"></canvas>
+    <div id="status"></div>
+    <button onclick="goMenu()">В меню</button>
+</div>
+
+<script src="telegram.js"></script>
+<script src="app.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
