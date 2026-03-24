@@ -1,16 +1,28 @@
+const express = require('express');
+const cors = require('cors');
 const WebSocket = require('ws');
 const { createRoom, joinRoom, rooms } = require('./rooms');
 const { createGame, makeMove } = require('./game');
 
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// Определяем порт Render
 const PORT = process.env.PORT || 3000;
-const wss = new WebSocket.Server({ port: PORT });
+
+const server = app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
+
+// WebSocket сервер поверх HTTP
+const wss = new WebSocket.Server({ server });
 
 wss.on('connection', (ws) => {
     ws.on('message', (msg) => {
         const data = JSON.parse(msg);
 
         switch (data.type) {
-
             case 'getRooms':
                 ws.send(JSON.stringify({
                     type: 'rooms',
@@ -29,7 +41,6 @@ wss.on('connection', (ws) => {
                 if (!joined) return;
 
                 ws.roomId = data.roomId;
-
                 const roomData = rooms[data.roomId];
 
                 if (roomData.players.length === 2) {
@@ -56,7 +67,6 @@ wss.on('connection', (ws) => {
                         result
                     }));
                 });
-
                 break;
         }
     });
