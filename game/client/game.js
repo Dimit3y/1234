@@ -18,9 +18,13 @@ function updateGame(game, result) {
     draw();
 
     if (result?.winner !== undefined) {
-        document.getElementById("status").innerText =
-            "Победил игрок " + result.winner;
-    }
+    const me = gameState.current; // текущий игрок после хода
+
+    const text = (result.winner === me)
+        ? "🎉 Ты победил!"
+        : "💀 Ты проиграл";
+
+    document.getElementById("status").innerText = text;
 }
 
 const canvas = document.getElementById("board");
