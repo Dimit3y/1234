@@ -1,5 +1,7 @@
 let ws;
 
+let currentRoomId = null;
+
 function connect() {
     ws = new WebSocket("wss://your-app.onrender.com");
 
@@ -39,10 +41,36 @@ function loadRooms() {
     }, 1000);
 }
 
+function copyLink() {
+    if (!currentRoomId) return;
+
+    const link = window.location.origin + "?room=" + currentRoomId;
+    navigator.clipboard.writeText(link);
+
+    alert("Ссылка скопирована!");
+}
+
 connect();
 
 window.ws = ws;
 const ws = new WebSocket("wss://one234-0j7v.onrender.com");
+
+window.onload = () => {
+    const params = new URLSearchParams(window.location.search);
+    const roomId = params.get("room");
+
+    if (roomId) {
+        console.log("Авто-вход в комнату:", roomId);
+
+        // ждём подключения WebSocket
+        const interval = setInterval(() => {
+            if (ws.readyState === 1) {
+                joinRoom(roomId);
+                clearInterval(interval);
+            }
+        }, 200);
+    }
+};
 
 ws.onmessage = (msg) => {
     const data = JSON.parse(msg.data);
@@ -68,7 +96,15 @@ function createRoom() {
 }
 
 function joinRoom(id) {
-    ws.send(JSON.stringify({ type: "joinRoom", roomId: id }));
+    if (ws.readyState !== 1) return;
+
+    currentRoomId = id;
+
+    ws.send(JSON.stringify({
+        type: "joinRoom",
+        roomId: id,
+        name: window.playerName
+    }));
 }
 
 function renderRooms(rooms) {
