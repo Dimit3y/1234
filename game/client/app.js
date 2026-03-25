@@ -53,7 +53,6 @@ function copyLink() {
 connect();
 
 window.ws = ws;
-const ws = new WebSocket("wss://one234-0j7v.onrender.com");
 
 window.onload = () => {
     const params = new URLSearchParams(window.location.search);
