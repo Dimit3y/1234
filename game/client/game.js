@@ -69,9 +69,59 @@ canvas.addEventListener("click", (e) => {
     draw();
 });
 
+function getAvailableMoves() {
+    const moves = [];
+    const me = gameState.players[gameState.current];
+
+    for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+            if (dx === 0 && dy === 0) continue;
+
+            const x = me.x + dx;
+            const y = me.y + dy;
+
+            if (
+                x >= 0 && x < 7 &&
+                y >= 0 && y < 7 &&
+                gameState.board[y][x] &&
+                !isOccupied(x, y)
+            ) {
+                moves.push({ x, y });
+            }
+        }
+    }
+
+    return moves;
+}
+
+function getAvailableRemovals(fromX, fromY) {
+    const cells = [];
+
+    for (let dx = -2; dx <= 2; dx++) {
+        for (let dy = -2; dy <= 2; dy++) {
+            const x = fromX + dx;
+            const y = fromY + dy;
+
+            if (
+                x >= 0 && x < 7 &&
+                y >= 0 && y < 7 &&
+                gameState.board[y][x] &&
+                !isOccupied(x, y)
+            ) {
+                cells.push({ x, y });
+            }
+        }
+    }
+
+    return cells;
+}
+
+function isOccupied(x, y) {
+    return gameState.players.some(p => p.x === x && p.y === y);
+}
+
 function draw() {
     const size = 50;
-
     ctx.clearRect(0, 0, 350, 350);
 
     // клетки
@@ -79,19 +129,29 @@ function draw() {
         for (let x = 0; x < 7; x++) {
             if (!gameState.board[y][x]) continue;
 
+            ctx.strokeStyle = "#555";
             ctx.strokeRect(x * size, y * size, size, size);
         }
     }
 
-    // подсветка выбранного хода
-    if (selectedMove) {
-        ctx.fillStyle = "rgba(0,255,0,0.3)";
-        ctx.fillRect(selectedMove.x * size, selectedMove.y * size, size, size);
+    // подсветка ходов
+    if (!selectedMove) {
+        getAvailableMoves().forEach(c => {
+            ctx.fillStyle = "rgba(0,255,0,0.3)";
+            ctx.fillRect(c.x * size, c.y * size, size, size);
+        });
+    } else {
+        getAvailableRemovals(selectedMove.x, selectedMove.y).forEach(c => {
+            ctx.fillStyle = "rgba(255,0,0,0.3)";
+            ctx.fillRect(c.x * size, c.y * size, size, size);
+        });
     }
 
     // игроки
     gameState.players.forEach((p, i) => {
-        ctx.fillStyle = i === 0 ? "blue" : "red";
-        ctx.fillRect(p.x * size + 10, p.y * size + 10, 30, 30);
+        ctx.fillStyle = i === 0 ? "#00aaff" : "#ff4444";
+        ctx.beginPath();
+        ctx.arc(p.x * size + 25, p.y * size + 25, 15, 0, Math.PI * 2);
+        ctx.fill();
     });
 }
