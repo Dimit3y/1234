@@ -88,6 +88,8 @@ ws.onmessage = (msg) => {
 };
 
 function createRoom() {
+    if (ws.readyState !== 1) return alert("Нет соединения");
+
     ws.send(JSON.stringify({
         type: "createRoom",
         name: window.playerName
