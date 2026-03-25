@@ -69,7 +69,7 @@ function renderRooms(rooms) {
 
     rooms.forEach(r => {
         const btn = document.createElement("button");
-        btn.innerText = "Комната " + r.id;
+        btn.innerText = "Комната " + r.id.slice(0, 5);
         btn.onclick = () => joinRoom(r.id);
         div.appendChild(btn);
     });
