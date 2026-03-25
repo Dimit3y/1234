@@ -35,35 +35,33 @@ wss.on('connection', (ws) => {
                 ws.roomId = room.id;
                 break;
 
-            case 'joinRoom':
+           case 'joinRoom':
                 const joined = joinRoom(data.roomId, ws, data.name);
-
-            case 'joinRoom':
-                const joined = joinRoom(data.roomId, ws);
+            
                 if (!joined) return;
-
+            
                 ws.roomId = data.roomId;
+            
                 const roomData = rooms[data.roomId];
-
+            
                 if (roomData.players.length === 2) {
                     const game = createGame(roomData);
                     roomData.game = game;
-
+            
                     roomData.players.forEach(p => {
-                        p.send(JSON.stringify({
+                        p.ws.send(JSON.stringify({
                             type: 'startGame',
                             game
                         }));
                     });
                 }
                 break;
-
             case 'move':
                 const roomObj = rooms[ws.roomId];
                 const result = makeMove(roomObj.game, ws, data);
 
                 roomObj.players.forEach(p => {
-                    p.send(JSON.stringify({
+                    p.ws.send(JSON.stringify({
                         type: 'update',
                         game: roomObj.game,
                         result
