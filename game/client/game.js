@@ -99,25 +99,43 @@ function getAvailableMoves() {
 }
 
 function getAvailableRemovals(fromX, fromY) {
-    const cells = [];
+    const visited = new Set();
+    const queue = [{ x: fromX, y: fromY, steps: 0 }];
+    const result = [];
 
-    for (let dx = -2; dx <= 2; dx++) {
-        for (let dy = -2; dy <= 2; dy++) {
-            const x = fromX + dx;
-            const y = fromY + dy;
+    while (queue.length > 0) {
+        const { x, y, steps } = queue.shift();
+        const key = x + "," + y;
 
-            if (
-                x >= 0 && x < 7 &&
-                y >= 0 && y < 7 &&
-                gameState.board[y][x] &&
-                !isOccupied(x, y)
-            ) {
-                cells.push({ x, y });
+        if (visited.has(key)) continue;
+        visited.add(key);
+
+        if (steps > 0) {
+            result.push({ x, y });
+        }
+
+        if (steps === 2) continue;
+
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                if (dx === 0 && dy === 0) continue;
+
+                const nx = x + dx;
+                const ny = y + dy;
+
+                if (
+                    nx >= 0 && nx < 7 &&
+                    ny >= 0 && ny < 7 &&
+                    gameState.board[ny][nx] &&
+                    !isOccupied(nx, ny)
+                ) {
+                    queue.push({ x: nx, y: ny, steps: steps + 1 });
+                }
             }
         }
     }
 
-    return cells;
+    return result;
 }
 
 function isOccupied(x, y) {
