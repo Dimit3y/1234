@@ -167,4 +167,6 @@ function draw() {
         ctx.arc(p.x * size + 25, p.y * size + 25, 18, 0, Math.PI * 2);
         ctx.fill();
     });
+    document.getElementById("status").innerText =
+    "Ход игрока: " + (gameState.current === 0 ? "Синий" : "Красный");
 }
