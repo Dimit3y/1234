@@ -1,5 +1,5 @@
 window.ws = ws;
-const ws = new WebSocket("ws://localhost:3000");
+const ws = new WebSocket("wss://one234-0j7v.onrender.com");
 
 ws.onmessage = (msg) => {
     const data = JSON.parse(msg.data);
