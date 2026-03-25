@@ -1,8 +1,14 @@
-const tg = window.Telegram.WebApp;
-tg.expand();
+let playerName = "Игрок";
 
-const user = tg.initDataUnsafe?.user;
+if (window.Telegram && window.Telegram.WebApp) {
+    const tg = window.Telegram.WebApp;
+    tg.expand();
 
-window.playerName = user
-    ? (user.first_name + (user.last_name ? " " + user.last_name : ""))
-    : "Игрок";
+    const user = tg.initDataUnsafe?.user;
+
+    if (user) {
+        playerName = user.first_name + (user.last_name ? " " + user.last_name : "");
+    }
+}
+
+window.playerName = playerName;
