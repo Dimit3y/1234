@@ -89,3 +89,15 @@ window.onload = () => {
         }, 200);
     }
 };
+
+function copyLink() {
+    if (!currentRoomId) {
+        alert("Сначала создай комнату");
+        return;
+    }
+
+    const link = window.location.origin + "?room=" + currentRoomId;
+
+    navigator.clipboard.writeText(link);
+    alert("Ссылка скопирована!");
+}
