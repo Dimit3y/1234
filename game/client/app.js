@@ -3,7 +3,7 @@ let ws;
 let currentRoomId = null;
 
 function connect() {
-    ws = new WebSocket("wss://your-app.onrender.com");
+    ws = new WebSocket("wss://one234-0j7v.onrender.com");
 
     ws.onopen = () => {
         console.log("WS connected");
