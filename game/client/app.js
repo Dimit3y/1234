@@ -5,6 +5,7 @@ function connect() {
 
     ws.onopen = () => {
         console.log("WS connected");
+        document.getElementById("connectionStatus").innerText = "Онлайн ✅";
         loadRooms();
     };
 
