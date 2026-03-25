@@ -14,6 +14,47 @@ function isInside(x, y) {
     return x >= 0 && x < 7 && y >= 0 && y < 7;
 }
 
+function getReachableCells(game, startX, startY, maxSteps, enemy) {
+    const visited = new Set();
+    const queue = [{ x: startX, y: startY, steps: 0 }];
+
+    const result = [];
+
+    while (queue.length > 0) {
+        const { x, y, steps } = queue.shift();
+        const key = `${x},${y}`;
+
+        if (visited.has(key)) continue;
+        visited.add(key);
+
+        if (steps > 0) {
+            result.push({ x, y });
+        }
+
+        if (steps === maxSteps) continue;
+
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                if (dx === 0 && dy === 0) continue;
+
+                const nx = x + dx;
+                const ny = y + dy;
+
+                if (
+                    nx >= 0 && nx < 7 &&
+                    ny >= 0 && ny < 7 &&
+                    game.board[ny][nx] &&
+                    !(nx === enemy.x && ny === enemy.y)
+                ) {
+                    queue.push({ x: nx, y: ny, steps: steps + 1 });
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
 function makeMove(game, ws, data) {
     const playerIndex = game.current;
     const player = game.players[playerIndex];
@@ -29,9 +70,19 @@ function makeMove(game, ws, data) {
     player.x = moveX;
     player.y = moveY;
 
-    // Проверка удаления (макс 2 клетки)
-    const dist = Math.max(Math.abs(removeX - player.x), Math.abs(removeY - player.y));
-    if (dist > 2) return { error: "Слишком далеко" };
+    const reachable = getReachableCells(
+        game,
+        player.x,
+        player.y,
+        2,
+        enemy
+    );
+    
+    const canRemove = reachable.some(c => c.x === removeX && c.y === removeY);
+    
+    if (!canRemove) {
+        return { error: "Нельзя удалить эту клетку" };
+    }
 
     game.board[removeY][removeX] = 0;
 
