@@ -31,10 +31,12 @@ wss.on('connection', (ws) => {
                 break;
 
             case 'createRoom':
-                const room = createRoom(ws);
+                const room = createRoom(ws, data.name);
                 ws.roomId = room.id;
-                ws.send(JSON.stringify({ type: 'roomCreated', room }));
                 break;
+
+            case 'joinRoom':
+                const joined = joinRoom(data.roomId, ws, data.name);
 
             case 'joinRoom':
                 const joined = joinRoom(data.roomId, ws);
