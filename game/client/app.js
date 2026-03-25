@@ -1,13 +1,11 @@
 let ws;
-
 let currentRoomId = null;
 
 function connect() {
-    ws = new WebSocket("wss://one234-0j7v.onrender.com");
+    ws = new WebSocket("wss://your-app.onrender.com");
 
     ws.onopen = () => {
         console.log("WS connected");
-        document.getElementById("connectionStatus").innerText = "Онлайн ✅";
         loadRooms();
     };
 
@@ -19,8 +17,10 @@ function connect() {
         }
 
         if (data.type === "roomCreated") {
+            currentRoomId = data.room.id;
+
             const link = window.location.origin + "?room=" + data.room.id;
-            alert("Скопируй ссылку и отправь другу:\n" + link);
+            alert("Скопируй ссылку:\n" + link);
         }
 
         if (data.type === "startGame") {
@@ -40,52 +40,6 @@ function loadRooms() {
         }
     }, 1000);
 }
-
-function copyLink() {
-    if (!currentRoomId) return;
-
-    const link = window.location.origin + "?room=" + currentRoomId;
-    navigator.clipboard.writeText(link);
-
-    alert("Ссылка скопирована!");
-}
-
-connect();
-
-window.ws = ws;
-
-window.onload = () => {
-    const params = new URLSearchParams(window.location.search);
-    const roomId = params.get("room");
-
-    if (roomId) {
-        console.log("Авто-вход в комнату:", roomId);
-
-        // ждём подключения WebSocket
-        const interval = setInterval(() => {
-            if (ws.readyState === 1) {
-                joinRoom(roomId);
-                clearInterval(interval);
-            }
-        }, 200);
-    }
-};
-
-ws.onmessage = (msg) => {
-    const data = JSON.parse(msg.data);
-
-    if (data.type === "rooms") {
-        renderRooms(data.rooms);
-    }
-
-    if (data.type === "startGame") {
-        startGame(data.game);
-    }
-
-    if (data.type === "update") {
-        updateGame(data.game, data.result);
-    }
-};
 
 function createRoom() {
     if (ws.readyState !== 1) return alert("Нет соединения");
@@ -120,6 +74,18 @@ function renderRooms(rooms) {
     });
 }
 
-setInterval(() => {
-    ws.send(JSON.stringify({ type: "getRooms" }));
-}, 1000);
+window.onload = () => {
+    connect();
+
+    const params = new URLSearchParams(window.location.search);
+    const roomId = params.get("room");
+
+    if (roomId) {
+        const interval = setInterval(() => {
+            if (ws && ws.readyState === 1) {
+                joinRoom(roomId);
+                clearInterval(interval);
+            }
+        }, 200);
+    }
+};
