@@ -56,8 +56,10 @@ ws.onmessage = (msg) => {
 };
 
 function createRoom() {
-    if (ws.readyState !== 1) return alert("Соединение...");
-    ws.send(JSON.stringify({ type: "createRoom" }));
+    ws.send(JSON.stringify({
+        type: "createRoom",
+        name: window.playerName
+    }));
 }
 
 function joinRoom(id) {
