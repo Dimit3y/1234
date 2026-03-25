@@ -124,34 +124,43 @@ function draw() {
     const size = 50;
     ctx.clearRect(0, 0, 350, 350);
 
-    // клетки
     for (let y = 0; y < 7; y++) {
         for (let x = 0; x < 7; x++) {
-            if (!gameState.board[y][x]) continue;
 
-            ctx.strokeStyle = "#555";
-            ctx.strokeRect(x * size, y * size, size, size);
+            if (gameState.board[y][x]) {
+                // обычная клетка
+                ctx.fillStyle = "#2ecc71"; // зелёная
+                ctx.fillRect(x * size, y * size, size, size);
+
+                ctx.strokeStyle = "#1e8449";
+                ctx.strokeRect(x * size, y * size, size, size);
+            } else {
+                // удалённая клетка
+                ctx.fillStyle = "#111";
+                ctx.fillRect(x * size, y * size, size, size);
+            }
         }
     }
 
     // подсветка ходов
     if (!selectedMove) {
         getAvailableMoves().forEach(c => {
-            ctx.fillStyle = "rgba(0,255,0,0.3)";
+            ctx.fillStyle = "rgba(255,255,0,0.4)";
             ctx.fillRect(c.x * size, c.y * size, size, size);
         });
     } else {
         getAvailableRemovals(selectedMove.x, selectedMove.y).forEach(c => {
-            ctx.fillStyle = "rgba(255,0,0,0.3)";
+            ctx.fillStyle = "rgba(255,0,0,0.4)";
             ctx.fillRect(c.x * size, c.y * size, size, size);
         });
     }
 
     // игроки
     gameState.players.forEach((p, i) => {
-        ctx.fillStyle = i === 0 ? "#00aaff" : "#ff4444";
+        ctx.fillStyle = i === 0 ? "#3498db" : "#e74c3c";
+
         ctx.beginPath();
-        ctx.arc(p.x * size + 25, p.y * size + 25, 15, 0, Math.PI * 2);
+        ctx.arc(p.x * size + 25, p.y * size + 25, 18, 0, Math.PI * 2);
         ctx.fill();
     });
 }
