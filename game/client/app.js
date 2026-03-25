@@ -1,3 +1,40 @@
+let ws;
+
+function connect() {
+    ws = new WebSocket("wss://your-app.onrender.com");
+
+    ws.onopen = () => {
+        console.log("WS connected");
+        loadRooms();
+    };
+
+    ws.onmessage = (msg) => {
+        const data = JSON.parse(msg.data);
+
+        if (data.type === "rooms") {
+            renderRooms(data.rooms);
+        }
+
+        if (data.type === "startGame") {
+            startGame(data.game);
+        }
+
+        if (data.type === "update") {
+            updateGame(data.game, data.result);
+        }
+    };
+}
+
+function loadRooms() {
+    setInterval(() => {
+        if (ws.readyState === 1) {
+            ws.send(JSON.stringify({ type: "getRooms" }));
+        }
+    }, 1000);
+}
+
+connect();
+
 window.ws = ws;
 const ws = new WebSocket("wss://one234-0j7v.onrender.com");
 
@@ -18,6 +55,7 @@ ws.onmessage = (msg) => {
 };
 
 function createRoom() {
+    if (ws.readyState !== 1) return alert("Соединение...");
     ws.send(JSON.stringify({ type: "createRoom" }));
 }
 
