@@ -16,6 +16,11 @@ function connect() {
             renderRooms(data.rooms);
         }
 
+        if (data.type === "roomCreated") {
+            const link = window.location.origin + "?room=" + data.room.id;
+            alert("Скопируй ссылку и отправь другу:\n" + link);
+        }
+
         if (data.type === "startGame") {
             startGame(data.game);
         }
