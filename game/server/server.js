@@ -19,7 +19,7 @@ const server = app.listen(PORT, () => {
 const wss = new WebSocket.Server({ server });
 
 wss.on('connection', (ws) => {
-    
+
     ws.on('message', (msg) => {
         const data = JSON.parse(msg);
 
@@ -34,33 +34,41 @@ wss.on('connection', (ws) => {
             case 'createRoom':
                 const room = createRoom(ws, data.name);
                 ws.roomId = room.id;
+
+                ws.send(JSON.stringify({
+                    type: 'roomCreated',
+                    room
+                }));
                 break;
 
-           case 'joinRoom':
+            case 'joinRoom':
                 const joined = joinRoom(data.roomId, ws, data.name);
                 if (!joined) return;
-            
+
                 ws.roomId = data.roomId;
-            
+
                 const roomData = rooms[data.roomId];
-            
+
                 if (roomData.players.length === 2) {
                     const game = createGame(roomData);
                     roomData.game = game;
-            
+
                     roomData.players.forEach(p => {
                         p.ws.send(JSON.stringify({
                             type: 'startGame',
                             game
                         }));
                     });
-            
-                    // 🗑️ УДАЛЯЕМ КОМНАТУ ИЗ СПИСКА
+
+                    // удаляем комнату из списка
                     delete rooms[data.roomId];
                 }
                 break;
+
             case 'move':
                 const roomObj = rooms[ws.roomId];
+                if (!roomObj) return;
+
                 const result = makeMove(roomObj.game, ws, data);
 
                 roomObj.players.forEach(p => {
@@ -70,22 +78,24 @@ wss.on('connection', (ws) => {
                         result
                     }));
                 });
-                break;    
+                break;
         }
-    ws.on('close', () => {
-            const roomId = ws.roomId;
-            if (!roomId) return;
-        
-            const room = rooms[roomId];
-            if (!room) return;
-        
-            // удаляем игрока из комнаты
-            room.players = room.players.filter(p => p.ws !== ws);
-        
-            // если никого не осталось → удаляем комнату
-            if (room.players.length === 0) {
-                delete rooms[roomId];
-            }
-        });
     });
+
+    ws.on('close', () => {
+        const roomId = ws.roomId;
+        if (!roomId) return;
+
+        const room = rooms[roomId];
+        if (!room) return;
+
+        // удаляем игрока
+        room.players = room.players.filter(p => p.ws !== ws);
+
+        // если пусто → удаляем комнату
+        if (room.players.length === 0) {
+            delete rooms[roomId];
+        }
+    });
+
 });
