@@ -2,12 +2,14 @@ let playerName = "Игрок";
 
 if (window.Telegram && window.Telegram.WebApp) {
     const tg = window.Telegram.WebApp;
+    tg.ready();
     tg.expand();
 
     const user = tg.initDataUnsafe?.user;
 
     if (user) {
-        playerName = user.first_name + (user.last_name ? " " + user.last_name : "");
+        const fullName = `${user.first_name || ""} ${user.last_name || ""}`.trim();
+        playerName = fullName || user.username || `id${user.id}`;
     }
 }
 
