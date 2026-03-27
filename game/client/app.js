@@ -6,8 +6,11 @@ function connect() {
 
     ws.onopen = () => {
         console.log("WS connected");
+    
+        document.getElementById("connectionStatus").innerText = "Онлайн ✅";
+    
         loadRooms();
-    };
+};
 
     ws.onmessage = (msg) => {
         const data = JSON.parse(msg.data);
