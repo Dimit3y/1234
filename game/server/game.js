@@ -14,7 +14,7 @@ function createGame(room) {
         name: room.players[1].name,
         ws: room.players[1].ws
     }
-]
+],
         current: 0,
         removed: []
     };
