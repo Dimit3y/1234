@@ -49,7 +49,7 @@ function updateGame(game, result) {
         : "💀 Ты проиграл";
 
     document.getElementById("status").innerText = text;
-}
+}}
 
 const canvas = document.getElementById("board");
 const ctx = canvas.getContext("2d");
