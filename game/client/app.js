@@ -58,9 +58,12 @@ function loadRooms() {
 function createRoom() {
     if (ws.readyState !== 1) return alert("Нет соединения");
 
+    const size = Number(document.getElementById("boardSize").value);
+    const spawnMode = document.getElementById("spawnMode").value;
+
     ws.send(JSON.stringify({
         type: "createRoom",
-        name: window.playerName
+        settings: { size, spawnMode }
     }));
 }
 
@@ -71,8 +74,7 @@ function joinRoom(id) {
 
     ws.send(JSON.stringify({
         type: "joinRoom",
-        roomId: id,
-        name: window.playerName
+        roomId: id
     }));
 }
 
@@ -82,10 +84,13 @@ function renderRooms(rooms) {
 
     rooms.forEach(r => {
         const btn = document.createElement("button");
+        btn.className = "room-card";
 
-        const count = r.players ? r.players.length : 0;
+        const count = r.playersCount || 0;
+        const size = r.settings?.size || 7;
+        const spawn = r.settings?.spawnMode === "random" ? "рандом" : "углы";
 
-        btn.innerText = `Комната ${r.id.slice(0, 5)} (${count}/2)`;
+        btn.innerText = `Комната ${r.id.slice(0, 5)} (${count}/2) • ${size}x${size}, ${spawn}`;
 
         btn.onclick = () => joinRoom(r.id);
 
@@ -114,7 +119,7 @@ window.onload = () => {
     }
 };
 
-function copyLink() {
+function copyLink() {␊
     if (!currentRoomId) {
         alert("Сначала создай комнату");
         return;
