@@ -18,8 +18,6 @@ function connect() {
 
         if (data.type === "roomCreated") {
             currentRoomId = data.room.id;
-
-            const link = window.location.origin + "?room=" + data.room.id;
         }
 
         if (data.type === "startGame") {
@@ -109,5 +107,6 @@ function copyLink() {
     const link = window.location.origin + "?room=" + currentRoomId;
 
     navigator.clipboard.writeText(link);
-    alert("Ссылка скопирована!");
+
+    document.getElementById("status").innerText = "✅ Ссылка скопирована!";
 }
