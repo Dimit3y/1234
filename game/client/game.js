@@ -1,12 +1,24 @@
 let gameState = null;
 let selectedMove = null;
+let myPlayerIndex = null;
 
-function startGame(game) {
+function startGame(game, playerIndex) {
     document.getElementById("menu").style.display = "none";
     document.getElementById("game").style.display = "block";
 
     gameState = game;
+    myPlayerIndex = playerIndex;
     selectedMove = null;
+
+    const gameElement = document.getElementById("game");
+    gameElement.classList.remove("player-blue", "player-red");
+    gameElement.classList.add(myPlayerIndex === 0 ? "player-blue" : "player-red");
+
+    const myColorInfo = document.getElementById("myColorInfo");
+    myColorInfo.innerText = myPlayerIndex === 0
+        ? "Ты играешь за 🔵 СИНЕГО"
+        : "Ты играешь за 🔴 КРАСНОГО";
+
     renderPlayers();
 
     draw();
@@ -18,18 +30,15 @@ function renderPlayers() {
 
     turnText.innerText =
         gameState.current === 0
-            ? `Ход: ${p1.name}`
-            : `Ход: ${p2.name}`;
-
-    const p1 = gameState.players[0];
-    const p2 = gameState.players[1];
+            ? "Ход: 🔵 Синий"
+            : "Ход: 🔴 Красный";
 
     div.innerHTML = `
         <div class="player ${gameState.current === 0 ? 'active' : ''}">
-            🔵 ${p1.name}
+            🔵 Синий
         </div>
         <div class="player ${gameState.current === 1 ? 'active' : ''}">
-            🔴 ${p2.name}
+            🔴 Красный
         </div>
     `;
 }
@@ -42,28 +51,30 @@ function updateGame(game, result) {
     draw();
 
     if (result?.winner !== undefined) {
-    const me = gameState.current; // текущий игрок после хода
+        const me = myPlayerIndex;
+        const text = (result.winner === me)
+            ? "🎉 Ты победил!"
+            : "💀 Ты проиграл";
 
-    const text = (result.winner === me)
-        ? "🎉 Ты победил!"
-        : "💀 Ты проиграл";
-
-    document.getElementById("status").innerText = text;
-}}
+        document.getElementById("status").innerText = text;
+    }
+}
 
 const canvas = document.getElementById("board");
 const ctx = canvas.getContext("2d");
 
 canvas.addEventListener("click", (e) => {
     if (!gameState) return;
+    if (myPlayerIndex === null) return;
+    if (gameState.current !== myPlayerIndex) return;
 
     const rect = canvas.getBoundingClientRect();
-    const size = 50;
+    const size = canvas.width / gameState.size;
 
     const x = Math.floor((e.clientX - rect.left) / size);
     const y = Math.floor((e.clientY - rect.top) / size);
 
-    const me = gameState.players[gameState.current];
+    const me = gameState.players[myPlayerIndex];
 
     // ЭТАП 1: выбор клетки для хода
     if (!selectedMove) {
@@ -71,7 +82,7 @@ canvas.addEventListener("click", (e) => {
         const dy = Math.abs(y - me.y);
 
         if (Math.max(dx, dy) === 1 && gameState.board[y][x]) {
-            selectedMove = { x, y };
+            selectedMove = { x, y, fromX: me.x, fromY: me.y };
         }
     }
     // ЭТАП 2: удаление клетки
@@ -99,7 +110,7 @@ canvas.addEventListener("click", (e) => {
 
 function getAvailableMoves() {
     const moves = [];
-    const me = gameState.players[gameState.current];
+    const me = gameState.players[myPlayerIndex];
 
     for (let dx = -1; dx <= 1; dx++) {
         for (let dy = -1; dy <= 1; dy++) {
@@ -109,8 +120,8 @@ function getAvailableMoves() {
             const y = me.y + dy;
 
             if (
-                x >= 0 && x < 7 &&
-                y >= 0 && y < 7 &&
+                x >= 0 && x < gameState.size &&
+                y >= 0 && y < gameState.size &&
                 gameState.board[y][x] &&
                 !isOccupied(x, y)
             ) {
@@ -122,7 +133,7 @@ function getAvailableMoves() {
     return moves;
 }
 
-function getAvailableRemovals(fromX, fromY) {
+function getAvailableRemovals(fromX, fromY, fromOldX, fromOldY) {
     const visited = new Set();
     const queue = [{ x: fromX, y: fromY, steps: 0 }];
     const result = [];
@@ -148,10 +159,10 @@ function getAvailableRemovals(fromX, fromY) {
                 const ny = y + dy;
 
                 if (
-                    nx >= 0 && nx < 7 &&
-                    ny >= 0 && ny < 7 &&
+                    nx >= 0 && nx < gameState.size &&
+                    ny >= 0 && ny < gameState.size &&
                     gameState.board[ny][nx] &&
-                    !isOccupied(nx, ny)
+                    !isOccupied(nx, ny, fromOldX, fromOldY)
                 ) {
                     queue.push({ x: nx, y: ny, steps: steps + 1 });
                 }
@@ -162,16 +173,22 @@ function getAvailableRemovals(fromX, fromY) {
     return result;
 }
 
-function isOccupied(x, y) {
-    return gameState.players.some(p => p.x === x && p.y === y);
+function isOccupied(x, y, ignoreX = null, ignoreY = null) {
+    return gameState.players.some(p => {
+        if (p.x === ignoreX && p.y === ignoreY) {
+            return false;
+        }
+
+        return p.x === x && p.y === y;
+    });
 }
 
 function draw() {
-    const size = 50;
-    ctx.clearRect(0, 0, 350, 350);
+    const size = canvas.width / gameState.size;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    for (let y = 0; y < 7; y++) {
-        for (let x = 0; x < 7; x++) {
+    for (let y = 0; y < gameState.size; y++) {
+        for (let x = 0; x < gameState.size; x++) {
 
             if (gameState.board[y][x]) {
                 // обычная клетка
@@ -195,7 +212,12 @@ function draw() {
             ctx.fillRect(c.x * size, c.y * size, size, size);
         });
     } else {
-        getAvailableRemovals(selectedMove.x, selectedMove.y).forEach(c => {
+        getAvailableRemovals(
+            selectedMove.x,
+            selectedMove.y,
+            selectedMove.fromX,
+            selectedMove.fromY
+        ).forEach(c => {
             ctx.fillStyle = "rgba(255,0,0,0.4)";
             ctx.fillRect(c.x * size, c.y * size, size, size);
         });
@@ -206,12 +228,26 @@ function draw() {
         ctx.fillStyle = i === 0 ? "#3498db" : "#e74c3c";
 
         ctx.beginPath();
-        ctx.arc(p.x * size + 25, p.y * size + 25, 18, 0, Math.PI * 2);
+        ctx.arc(
+            p.x * size + size / 2,
+            p.y * size + size / 2,
+            Math.max(8, size * 0.36),
+            0,
+            Math.PI * 2
+        );
         ctx.fill();
     });
-    document.getElementById("status").innerText =
-    "Ход игрока: " + (gameState.current === 0 ? "Синий" : "Красный");
+}
+
+function surrenderGame() {
+    if (!gameState || myPlayerIndex === null) return;
+
+    const ok = window.confirm("Точно сдаться? Это засчитается как поражение.");
+    if (!ok) return;
+
+    ws.send(JSON.stringify({ type: "surrender" }));
 }
 
 window.startGame = startGame;
 window.updateGame = updateGame;
+window.surrenderGame = surrenderGame;
