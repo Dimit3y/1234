@@ -188,3 +188,6 @@ function draw() {
     document.getElementById("status").innerText =
     "Ход игрока: " + (gameState.current === 0 ? "Синий" : "Красный");
 }
+
+window.startGame = startGame;
+window.updateGame = updateGame;
