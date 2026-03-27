@@ -7,12 +7,19 @@ function startGame(game) {
 
     gameState = game;
     selectedMove = null;
+    renderPlayers();
 
     draw();
 }
 
 function renderPlayers() {
     const div = document.getElementById("playersInfo");
+    const turnText = document.getElementById("status");
+
+    turnText.innerText =
+        gameState.current === 0
+            ? `Ход: ${p1.name}`
+            : `Ход: ${p2.name}`;
 
     const p1 = gameState.players[0];
     const p2 = gameState.players[1];
@@ -31,6 +38,7 @@ function updateGame(game, result) {
     gameState = game;
     selectedMove = null;
 
+    renderPlayers();
     draw();
 
     if (result?.winner !== undefined) {
