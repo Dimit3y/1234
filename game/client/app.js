@@ -20,7 +20,6 @@ function connect() {
             currentRoomId = data.room.id;
 
             const link = window.location.origin + "?room=" + data.room.id;
-            alert("Скопируй ссылку:\n" + link);
         }
 
         if (data.type === "startGame") {
