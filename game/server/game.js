@@ -1,33 +1,65 @@
 function createGame(room) {
+    const size = room.settings?.size || 7;
+    const spawnMode = room.settings?.spawnMode || 'corners';
+    const board = Array(size).fill(null).map(() => Array(size).fill(1));
+
+    const spawnPositions = getSpawnPositions(size, spawnMode);
+
     return {
-        board: Array(7).fill().map(() => Array(7).fill(1)),
+        size,
+        board,
         players: [
-    {
-        x: 0,
-        y: 0,
-        name: room.players[0].name,
-        ws: room.players[0].ws
-    },
-    {
-        x: 6,
-        y: 6,
-        name: room.players[1].name,
-        ws: room.players[1].ws
-    }
-],
+            {
+                x: spawnPositions[0].x,
+                y: spawnPositions[0].y,
+                ws: room.players[0].ws
+            },
+            {
+                x: spawnPositions[1].x,
+                y: spawnPositions[1].y,
+                ws: room.players[1].ws
+            }
+        ],
         current: 0,
         removed: []
     };
 }
 
-function isInside(x, y) {
-    return x >= 0 && x < 7 && y >= 0 && y < 7;
+function getSpawnPositions(size, spawnMode) {
+    if (spawnMode === 'random') {
+        const first = {
+            x: Math.floor(Math.random() * size),
+            y: Math.floor(Math.random() * size)
+        };
+
+        let second = {
+            x: Math.floor(Math.random() * size),
+            y: Math.floor(Math.random() * size)
+        };
+
+        while (second.x === first.x && second.y === first.y) {
+            second = {
+                x: Math.floor(Math.random() * size),
+                y: Math.floor(Math.random() * size)
+            };
+        }
+
+        return [first, second];
+    }
+
+    return [
+        { x: 0, y: 0 },
+        { x: size - 1, y: size - 1 }
+    ];
+}
+
+function isInside(game, x, y) {
+    return x >= 0 && x < game.size && y >= 0 && y < game.size;
 }
 
 function getReachableCells(game, startX, startY, maxSteps, enemy) {
     const visited = new Set();
     const queue = [{ x: startX, y: startY, steps: 0 }];
-
     const result = [];
 
     while (queue.length > 0) {
@@ -51,8 +83,7 @@ function getReachableCells(game, startX, startY, maxSteps, enemy) {
                 const ny = y + dy;
 
                 if (
-                    nx >= 0 && nx < 7 &&
-                    ny >= 0 && ny < 7 &&
+                    isInside(game, nx, ny) &&
                     game.board[ny][nx] &&
                     !(nx === enemy.x && ny === enemy.y)
                 ) {
@@ -65,72 +96,71 @@ function getReachableCells(game, startX, startY, maxSteps, enemy) {
     return result;
 }
 
+function hasAnyMove(game, playerIndex) {
+    const player = game.players[playerIndex];
+    const enemy = game.players[1 - playerIndex];
+
+    for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+            if (dx === 0 && dy === 0) continue;
+
+            const moveX = player.x + dx;
+            const moveY = player.y + dy;
+
+            if (!isInside(game, moveX, moveY)) continue;
+            if (!game.board[moveY][moveX]) continue;
+            if (moveX === enemy.x && moveY === enemy.y) continue;
+
+            const removable = getReachableCells(game, moveX, moveY, 2, enemy);
+            if (removable.length > 0) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 function makeMove(game, ws, data) {
     const playerIndex = game.players.findIndex(p => p.ws === ws);
-    if (playerIndex === -1) return { error: "Игрок не найден" };
+    if (playerIndex === -1) return { error: 'Игрок не найден' };
+
+    if (playerIndex !== game.current) {
+        return { error: 'Не твой ход' };
+    }
+
     const player = game.players[playerIndex];
     const enemy = game.players[1 - playerIndex];
 
     const { moveX, moveY, removeX, removeY } = data;
 
-    // Проверка хода
     if (Math.abs(moveX - player.x) > 1 || Math.abs(moveY - player.y) > 1) {
-        return { error: "Неверный ход" };
+        return { error: 'Неверный ход' };
     }
 
-    if (playerIndex !== game.current) {
-    return { error: "Не твой ход" };
-    }
-
-    if (!isInside(moveX, moveY) || !game.board[moveY][moveX]) {
-        return { error: "Нельзя ходить в эту клетку" };
+    if (!isInside(game, moveX, moveY) || !game.board[moveY][moveX]) {
+        return { error: 'Нельзя ходить в эту клетку' };
     }
 
     if (moveX === enemy.x && moveY === enemy.y) {
-        return { error: "Клетка занята соперником" };
+        return { error: 'Клетка занята соперником' };
     }
 
-    // Перемещение
     player.x = moveX;
     player.y = moveY;
 
-    const reachable = getReachableCells(
-        game,
-        player.x,
-        player.y,
-        2,
-        enemy
-    );
-    
+    const reachable = getReachableCells(game, player.x, player.y, 2, enemy);
     const canRemove = reachable.some(c => c.x === removeX && c.y === removeY);
-    
+
     if (!canRemove) {
-        return { error: "Нельзя удалить эту клетку" };
+        return { error: 'Нельзя удалить эту клетку' };
     }
 
     game.board[removeY][removeX] = 0;
 
-    // Смена игрока
     game.current = 1 - game.current;
 
-    // Проверка поражения
-    const next = game.players[game.current];
-    let canMove = false;
-
-    for (let dx = -1; dx <= 1; dx++) {
-        for (let dy = -1; dy <= 1; dy++) {
-            const nx = next.x + dx;
-            const ny = next.y + dy;
-
-            const occupiedByEnemy = nx === player.x && ny === player.y;
-
-            if (isInside(nx, ny) && game.board[ny][nx] && !occupiedByEnemy) {
-                canMove = true;
-            }
-        }
-    }
-
-    if (!canMove) {
+    if (!hasAnyMove(game, game.current)) {
         return { winner: playerIndex };
     }
 
