@@ -1,21 +1,122 @@
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #1e1e2f, #2a2a40);
+    font-family: "Segoe UI", Arial, sans-serif;
+    background:
+        radial-gradient(circle at 20% 10%, rgba(123, 104, 238, 0.35), transparent 35%),
+        radial-gradient(circle at 80% 20%, rgba(52, 152, 219, 0.3), transparent 30%),
+        linear-gradient(135deg, #111827, #1f2937);
     color: white;
     text-align: center;
+    min-height: 100vh;
+}
+
+h1 {
+    margin: 0;
+    font-size: 34px;
+    letter-spacing: 0.3px;
 }
 
 h2 {
-    margin-top: 20px;
+    margin: 18px 0 8px;
+    font-size: 20px;
+}
+
+.subtitle {
+    margin: 8px 0 14px;
+    opacity: 0.85;
+    font-size: 15px;
 }
 
 #menu {
-    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.menu-card {
+    width: min(760px, 95vw);
+    background: rgba(17, 24, 39, 0.76);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(8px);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+    padding: 22px 18px 20px;
+}
+
+.connection-pill {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+#game {
+    padding: 14px 16px 24px;
+    border-radius: 14px;
+    width: fit-content;
+    margin: 12px auto;
+}
+
+#game.player-blue {
+    background: rgba(52, 152, 219, 0.16);
+}
+
+#game.player-red {
+    background: rgba(231, 76, 60, 0.16);
+}
+
+#myColorInfo {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 10px;
 }
 
 #rooms {
-    margin: 20px 0;
+    margin: 14px 0 0;
+    max-height: 38vh;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+#roomSettings {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+}
+
+#roomSettings label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 14px;
+}
+
+#roomSettings select {
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: none;
+    background: rgba(15, 23, 42, 0.9);
+    color: #f8fafc;
+}
+
+.menu-actions {
+    margin-top: 12px;
+}
+
+.room-card {
+    margin: 8px auto;
+    width: min(620px, 90%);
+    display: block;
 }
 
 button {
@@ -23,16 +124,22 @@ button {
     margin: 8px;
     border: none;
     border-radius: 10px;
-    background: #4CAF50;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
     color: white;
     font-size: 16px;
+    font-weight: 600;
     cursor: pointer;
     transition: 0.2s;
+    box-shadow: 0 10px 16px rgba(37, 99, 235, 0.25);
+}
+
+button.secondary {
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow: 0 10px 16px rgba(5, 150, 105, 0.24);
 }
 
 button:hover {
-    background: #45a049;
-    transform: scale(1.05);
+    transform: translateY(-1px);
 }
 
 #playersInfo {
