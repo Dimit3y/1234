@@ -2,9 +2,19 @@ function createGame(room) {
     return {
         board: Array(7).fill().map(() => Array(7).fill(1)),
         players: [
-            { x: 0, y: 0, name: room.players[0].name },
-            { x: 6, y: 6, name: room.players[1].name}
-        ],
+    {
+        x: 0,
+        y: 0,
+        name: room.players[0].name,
+        ws: room.players[0].ws
+    },
+    {
+        x: 6,
+        y: 6,
+        name: room.players[1].name,
+        ws: room.players[1].ws
+    }
+]
         current: 0,
         removed: []
     };
@@ -56,7 +66,8 @@ function getReachableCells(game, startX, startY, maxSteps, enemy) {
 }
 
 function makeMove(game, ws, data) {
-    const playerIndex = game.current;
+    const playerIndex = game.players.findIndex(p => p.ws === ws);
+    if (playerIndex === -1) return { error: "Игрок не найден" };
     const player = game.players[playerIndex];
 
     const { moveX, moveY, removeX, removeY } = data;
@@ -64,6 +75,10 @@ function makeMove(game, ws, data) {
     // Проверка хода
     if (Math.abs(moveX - player.x) > 1 || Math.abs(moveY - player.y) > 1) {
         return { error: "Неверный ход" };
+    }
+
+    if (playerIndex !== game.current) {
+    return { error: "Не твой ход" };
     }
 
     // Перемещение
