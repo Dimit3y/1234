@@ -35,7 +35,6 @@ wss.on('connection', (ws) => {
                         .filter(r => !r.inGame)
                         .map(r => ({
                             id: r.id,
-                            name: r.name,
                             settings: r.settings,
                             playersCount: r.players.length
                         }))

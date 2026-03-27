@@ -1,11 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 
 const rooms = {};
-let roomCounter = 1;
-
-function formatRoomName(num) {
-    return `Комната №${String(num).padStart(3, '0')}`;
-}
 
 function normalizeSettings(settings = {}) {
     const rawSize = Number(settings.size);
@@ -20,11 +15,9 @@ function normalizeSettings(settings = {}) {
 
 function createRoom(ws, settings) {
     const id = uuidv4();
-    const name = formatRoomName(roomCounter++);
 
     rooms[id] = {
         id,
-        name,
         settings: normalizeSettings(settings),
         players: [{ ws }],
         game: null,
