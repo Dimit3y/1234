@@ -19,6 +19,7 @@ const server = app.listen(PORT, () => {
 const wss = new WebSocket.Server({ server });
 
 wss.on('connection', (ws) => {
+    
     ws.on('message', (msg) => {
         const data = JSON.parse(msg);
 
@@ -37,7 +38,6 @@ wss.on('connection', (ws) => {
 
            case 'joinRoom':
                 const joined = joinRoom(data.roomId, ws, data.name);
-            
                 if (!joined) return;
             
                 ws.roomId = data.roomId;
@@ -54,6 +54,9 @@ wss.on('connection', (ws) => {
                             game
                         }));
                     });
+            
+                    // 🗑️ УДАЛЯЕМ КОМНАТУ ИЗ СПИСКА
+                    delete rooms[data.roomId];
                 }
                 break;
             case 'move':
@@ -67,7 +70,22 @@ wss.on('connection', (ws) => {
                         result
                     }));
                 });
-                break;
+                break;    
         }
+    ws.on('close', () => {
+            const roomId = ws.roomId;
+            if (!roomId) return;
+        
+            const room = rooms[roomId];
+            if (!room) return;
+        
+            // удаляем игрока из комнаты
+            room.players = room.players.filter(p => p.ws !== ws);
+        
+            // если никого не осталось → удаляем комнату
+            if (room.players.length === 0) {
+                delete rooms[roomId];
+            }
+        });
     });
 });
