@@ -69,6 +69,7 @@ function makeMove(game, ws, data) {
     const playerIndex = game.players.findIndex(p => p.ws === ws);
     if (playerIndex === -1) return { error: "Игрок не найден" };
     const player = game.players[playerIndex];
+    const enemy = game.players[1 - playerIndex];
 
     const { moveX, moveY, removeX, removeY } = data;
 
@@ -79,6 +80,14 @@ function makeMove(game, ws, data) {
 
     if (playerIndex !== game.current) {
     return { error: "Не твой ход" };
+    }
+
+    if (!isInside(moveX, moveY) || !game.board[moveY][moveX]) {
+        return { error: "Нельзя ходить в эту клетку" };
+    }
+
+    if (moveX === enemy.x && moveY === enemy.y) {
+        return { error: "Клетка занята соперником" };
     }
 
     // Перемещение
@@ -113,7 +122,9 @@ function makeMove(game, ws, data) {
             const nx = next.x + dx;
             const ny = next.y + dy;
 
-            if (isInside(nx, ny) && game.board[ny][nx]) {
+            const occupiedByEnemy = nx === player.x && ny === player.y;
+
+            if (isInside(nx, ny) && game.board[ny][nx] && !occupiedByEnemy) {
                 canMove = true;
             }
         }
