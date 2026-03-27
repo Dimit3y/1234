@@ -37,13 +37,19 @@ wss.on('connection', (ws) => {
             case 'getRooms':
                 ws.send(JSON.stringify({
                     type: 'rooms',
-                    rooms: Object.values(rooms).filter(r => !r.inGame)
+                    rooms: Object.values(rooms)
+                        .filter(r => !r.inGame)
+                        .map(r => ({
+                            id: r.id,
+                            settings: r.settings,
+                            playersCount: r.players.length
+                        }))
                 }));
                 break;
 
             // ➕ создать комнату
             case 'createRoom':
-                const room = createRoom(ws, data.name);
+                const room = createRoom(ws, data.settings);
                 ws.roomId = room.id;
 
                 ws.send(JSON.stringify({
@@ -54,7 +60,7 @@ wss.on('connection', (ws) => {
 
             // 🚪 войти в комнату
             case 'joinRoom':
-                const joined = joinRoom(data.roomId, ws, data.name);
+                const joined = joinRoom(data.roomId, ws);
                 if (!joined) return;
 
                 ws.roomId = data.roomId;
@@ -71,7 +77,8 @@ wss.on('connection', (ws) => {
                     roomData.players.forEach(p => {
                         p.ws.send(JSON.stringify({
                             type: 'startGame',
-                            game
+                            game,
+                            playerIndex: game.players.findIndex(player => player.ws === p.ws)
                         }));
                     });
                 }
@@ -97,6 +104,27 @@ wss.on('connection', (ws) => {
                     delete rooms[ws.roomId];
                 }
 
+                break;
+
+            case 'surrender':
+                const activeRoom = rooms[ws.roomId];
+                if (!activeRoom || !activeRoom.game) return;
+
+                const loserIndex = activeRoom.game.players.findIndex(player => player.ws === ws);
+                if (loserIndex === -1) return;
+                const winnerIndex = 1 - loserIndex;
+
+                activeRoom.players.forEach(p => {
+                    p.ws.send(JSON.stringify({
+                        type: 'gameOver',
+                        reason: 'surrender',
+                        winner: winnerIndex,
+                        loser: loserIndex,
+                        playerIndex: activeRoom.game.players.findIndex(player => player.ws === p.ws)
+                    }));
+                });
+
+                delete rooms[ws.roomId];
                 break;
         }
     });
