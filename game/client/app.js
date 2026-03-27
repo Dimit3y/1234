@@ -97,7 +97,12 @@ window.onload = () => {
     connect();
 
     const params = new URLSearchParams(window.location.search);
-    const roomId = params.get("room");
+    const roomIdFromSite = params.get("room");
+    const roomIdFromBot = params.get("startapp") || params.get("tgWebAppStartParam") || params.get("start");
+    const roomIdRaw = roomIdFromSite || roomIdFromBot;
+    const roomId = roomIdRaw && roomIdRaw.startsWith("room_")
+        ? roomIdRaw.slice(5)
+        : roomIdRaw;
 
     if (roomId) {
         const interval = setInterval(() => {
@@ -115,7 +120,7 @@ function copyLink() {
         return;
     }
 
-    const link = window.location.origin + "?room=" + currentRoomId;
+    const link = "https://t.me/Gametg000bot?startapp=room_" + currentRoomId;
 
     navigator.clipboard.writeText(link);
 

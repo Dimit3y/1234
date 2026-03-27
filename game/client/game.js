@@ -84,7 +84,7 @@ canvas.addEventListener("click", (e) => {
         const dy = Math.abs(y - me.y);
 
         if (Math.max(dx, dy) === 1 && gameState.board[y][x]) {
-            selectedMove = { x, y };
+            selectedMove = { x, y, fromX: me.x, fromY: me.y };
         }
     }
     // ЭТАП 2: удаление клетки
@@ -135,7 +135,7 @@ function getAvailableMoves() {
     return moves;
 }
 
-function getAvailableRemovals(fromX, fromY) {
+function getAvailableRemovals(fromX, fromY, fromOldX, fromOldY) {
     const visited = new Set();
     const queue = [{ x: fromX, y: fromY, steps: 0 }];
     const result = [];
@@ -164,7 +164,7 @@ function getAvailableRemovals(fromX, fromY) {
                     nx >= 0 && nx < 7 &&
                     ny >= 0 && ny < 7 &&
                     gameState.board[ny][nx] &&
-                    !isOccupied(nx, ny)
+                    !isOccupied(nx, ny, fromOldX, fromOldY)
                 ) {
                     queue.push({ x: nx, y: ny, steps: steps + 1 });
                 }
@@ -175,8 +175,14 @@ function getAvailableRemovals(fromX, fromY) {
     return result;
 }
 
-function isOccupied(x, y) {
-    return gameState.players.some(p => p.x === x && p.y === y);
+function isOccupied(x, y, ignoreX = null, ignoreY = null) {
+    return gameState.players.some(p => {
+        if (p.x === ignoreX && p.y === ignoreY) {
+            return false;
+        }
+
+        return p.x === x && p.y === y;
+    });
 }
 
 function draw() {
@@ -208,7 +214,12 @@ function draw() {
             ctx.fillRect(c.x * size, c.y * size, size, size);
         });
     } else {
-        getAvailableRemovals(selectedMove.x, selectedMove.y).forEach(c => {
+        getAvailableRemovals(
+            selectedMove.x,
+            selectedMove.y,
+            selectedMove.fromX,
+            selectedMove.fromY
+        ).forEach(c => {
             ctx.fillStyle = "rgba(255,0,0,0.4)";
             ctx.fillRect(c.x * size, c.y * size, size, size);
         });
