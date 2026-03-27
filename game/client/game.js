@@ -11,6 +11,22 @@ function startGame(game) {
     draw();
 }
 
+function renderPlayers() {
+    const div = document.getElementById("playersInfo");
+
+    const p1 = gameState.players[0];
+    const p2 = gameState.players[1];
+
+    div.innerHTML = `
+        <div class="player ${gameState.current === 0 ? 'active' : ''}">
+            🔵 ${p1.name}
+        </div>
+        <div class="player ${gameState.current === 1 ? 'active' : ''}">
+            🔴 ${p2.name}
+        </div>
+    `;
+}
+
 function updateGame(game, result) {
     gameState = game;
     selectedMove = null;
