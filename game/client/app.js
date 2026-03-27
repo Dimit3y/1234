@@ -27,6 +27,12 @@ function connect() {
             startGame(data.game);
         }
 
+        if (data.type === "gameOver") {
+            if (data.reason === "opponent_left") {
+                document.getElementById("status").innerText = "🎉 Соперник вышел. Ты победил!";
+            }
+        }
+
         if (data.type === "update") {
             updateGame(data.game, data.result);
         }
