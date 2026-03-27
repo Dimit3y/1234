@@ -1,14 +1,3 @@
-const express = require('express');
-const cors = require('cors');
-const WebSocket = require('ws');
-
-const { createRoom, joinRoom, rooms } = require('./rooms');
-const { createGame, makeMove } = require('./game');
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
 const PORT = process.env.PORT || 3000;
 
 // HTTP сервер
@@ -37,13 +26,19 @@ wss.on('connection', (ws) => {
             case 'getRooms':
                 ws.send(JSON.stringify({
                     type: 'rooms',
-                    rooms: Object.values(rooms).filter(r => !r.inGame)
+                    rooms: Object.values(rooms)
+                        .filter(r => !r.inGame)
+                        .map(r => ({
+                            id: r.id,
+                            settings: r.settings,
+                            playersCount: r.players.length
+                        }))
                 }));
                 break;
 
             // ➕ создать комнату
             case 'createRoom':
-                const room = createRoom(ws, data.name);
+                const room = createRoom(ws, data.settings);
                 ws.roomId = room.id;
 
                 ws.send(JSON.stringify({
@@ -52,9 +47,9 @@ wss.on('connection', (ws) => {
                 }));
                 break;
 
-            // 🚪 войти в комнату
-            case 'joinRoom':
-                const joined = joinRoom(data.roomId, ws, data.name);
+            // 🚪 войти в комнату␊
+            case 'joinRoom':␊
+                const joined = joinRoom(data.roomId, ws);
                 if (!joined) return;
 
                 ws.roomId = data.roomId;
@@ -146,11 +141,3 @@ wss.on('connection', (ws) => {
             delete rooms[roomId];
             return;
         }
-
-        // если никого → удалить комнату
-        if (room.players.length === 0) {
-            delete rooms[roomId];
-        }
-    });
-
-});
