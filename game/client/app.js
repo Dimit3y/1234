@@ -24,12 +24,20 @@ function connect() {
         }
 
         if (data.type === "startGame") {
-            startGame(data.game);
+            startGame(data.game, data.playerIndex);
         }
 
         if (data.type === "gameOver") {
             if (data.reason === "opponent_left") {
                 document.getElementById("status").innerText = "🎉 Соперник вышел. Ты победил!";
+            }
+
+            if (data.reason === "surrender") {
+                if (data.loser === data.playerIndex) {
+                    document.getElementById("status").innerText = "💀 Ты сдался. Поражение.";
+                } else {
+                    document.getElementById("status").innerText = "🎉 Соперник сдался. Ты победил!";
+                }
             }
         }
 

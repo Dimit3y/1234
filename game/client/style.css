@@ -14,6 +14,27 @@ h2 {
     padding: 20px;
 }
 
+#game {
+    padding: 14px 16px 24px;
+    border-radius: 14px;
+    width: fit-content;
+    margin: 12px auto;
+}
+
+#game.player-blue {
+    background: rgba(52, 152, 219, 0.16);
+}
+
+#game.player-red {
+    background: rgba(231, 76, 60, 0.16);
+}
+
+#myColorInfo {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
 #rooms {
     margin: 20px 0;
 }

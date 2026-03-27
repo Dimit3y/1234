@@ -1,12 +1,24 @@
 let gameState = null;
 let selectedMove = null;
+let myPlayerIndex = null;
 
-function startGame(game) {
+function startGame(game, playerIndex) {
     document.getElementById("menu").style.display = "none";
     document.getElementById("game").style.display = "block";
 
     gameState = game;
+    myPlayerIndex = playerIndex;
     selectedMove = null;
+
+    const gameElement = document.getElementById("game");
+    gameElement.classList.remove("player-blue", "player-red");
+    gameElement.classList.add(myPlayerIndex === 0 ? "player-blue" : "player-red");
+
+    const myColorInfo = document.getElementById("myColorInfo");
+    myColorInfo.innerText = myPlayerIndex === 0
+        ? "Ты играешь за 🔵 СИНЕГО"
+        : "Ты играешь за 🔴 КРАСНОГО";
+
     renderPlayers();
 
     draw();
@@ -15,14 +27,13 @@ function startGame(game) {
 function renderPlayers() {
     const div = document.getElementById("playersInfo");
     const turnText = document.getElementById("status");
+    const p1 = gameState.players[0];
+    const p2 = gameState.players[1];
 
     turnText.innerText =
         gameState.current === 0
             ? `Ход: ${p1.name}`
             : `Ход: ${p2.name}`;
-
-    const p1 = gameState.players[0];
-    const p2 = gameState.players[1];
 
     div.innerHTML = `
         <div class="player ${gameState.current === 0 ? 'active' : ''}">
@@ -42,20 +53,22 @@ function updateGame(game, result) {
     draw();
 
     if (result?.winner !== undefined) {
-    const me = gameState.current; // текущий игрок после хода
+        const me = myPlayerIndex;
+        const text = (result.winner === me)
+            ? "🎉 Ты победил!"
+            : "💀 Ты проиграл";
 
-    const text = (result.winner === me)
-        ? "🎉 Ты победил!"
-        : "💀 Ты проиграл";
-
-    document.getElementById("status").innerText = text;
-}}
+        document.getElementById("status").innerText = text;
+    }
+}
 
 const canvas = document.getElementById("board");
 const ctx = canvas.getContext("2d");
 
 canvas.addEventListener("click", (e) => {
     if (!gameState) return;
+    if (myPlayerIndex === null) return;
+    if (gameState.current !== myPlayerIndex) return;
 
     const rect = canvas.getBoundingClientRect();
     const size = 50;
@@ -63,7 +76,7 @@ canvas.addEventListener("click", (e) => {
     const x = Math.floor((e.clientX - rect.left) / size);
     const y = Math.floor((e.clientY - rect.top) / size);
 
-    const me = gameState.players[gameState.current];
+    const me = gameState.players[myPlayerIndex];
 
     // ЭТАП 1: выбор клетки для хода
     if (!selectedMove) {
@@ -99,7 +112,7 @@ canvas.addEventListener("click", (e) => {
 
 function getAvailableMoves() {
     const moves = [];
-    const me = gameState.players[gameState.current];
+    const me = gameState.players[myPlayerIndex];
 
     for (let dx = -1; dx <= 1; dx++) {
         for (let dy = -1; dy <= 1; dy++) {
@@ -209,9 +222,17 @@ function draw() {
         ctx.arc(p.x * size + 25, p.y * size + 25, 18, 0, Math.PI * 2);
         ctx.fill();
     });
-    document.getElementById("status").innerText =
-    "Ход игрока: " + (gameState.current === 0 ? "Синий" : "Красный");
+}
+
+function surrenderGame() {
+    if (!gameState || myPlayerIndex === null) return;
+
+    const ok = window.confirm("Точно сдаться? Это засчитается как поражение.");
+    if (!ok) return;
+
+    ws.send(JSON.stringify({ type: "surrender" }));
 }
 
 window.startGame = startGame;
 window.updateGame = updateGame;
+window.surrenderGame = surrenderGame;
