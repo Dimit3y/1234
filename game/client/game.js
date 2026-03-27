@@ -18,7 +18,7 @@ function startGame(game, playerIndex) {
   gameElement.classList.add(myPlayerIndex === 0 ? "player-blue" : "player-red");
 
   const myColorInfo = document.getElementById("myColorInfo");
-  myColorInfo.innerText = myPlayerIndex === 0 ? "You are BLUE" : "You are RED";
+  myColorInfo.innerText = myPlayerIndex === 0 ? "Ты Синий" : "Ты Красный";
 
   renderPlayers();
   draw();
@@ -28,7 +28,7 @@ function renderPlayers() {
   const div = document.getElementById("playersInfo");
   const turnText = document.getElementById("status");
 
-  turnText.innerText = gameState.current === 0 ? "Turn: BLUE" : "Turn: RED";
+  turnText.innerText = gameState.current === 0 ? "Ход: Синий" : "Ход: Красный";
 
   div.innerHTML =
     '<div class="player ' +
@@ -47,7 +47,7 @@ function updateGame(game, result) {
   draw();
 
   if (result && typeof result.winner !== "undefined") {
-    const text = result.winner === myPlayerIndex ? "You win!" : "You lose!";
+    const text = result.winner === myPlayerIndex ? "Победа!" : "Поражение";
     document.getElementById("status").innerText = text;
   }
 }
@@ -223,7 +223,7 @@ function draw() {
 function surrenderGame() {
   if (!gameState || myPlayerIndex === null) return;
 
-  const ok = window.confirm("Surrender? This counts as a defeat.");
+  const ok = window.confirm("Точно сдаться?");
   if (!ok) return;
 
   ws.send(JSON.stringify({ type: "surrender" }));
