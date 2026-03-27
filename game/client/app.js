@@ -34,9 +34,9 @@ function connect() {
         status.innerText = "Opponent left. You win!";
       } else if (data.reason === "surrender") {
         if (data.loser === data.playerIndex) {
-          status.innerText = "You surrendered. Defeat.";
+          status.innerText = "Ты сдался. Поражение";
         } else {
-          status.innerText = "Opponent surrendered. You win!";
+          status.innerText = "Противник сдался. Победа!";
         }
       }
     }
