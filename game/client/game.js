@@ -3,37 +3,43 @@ let selectedMove = null;
 let myPlayerIndex = null;
 
 function startGame(game, playerIndex) {
-    document.getElementById('menu').style.display = 'none';
-    document.getElementById('game').style.display = 'block';
+    document.getElementById("menu").style.display = "none";
+    document.getElementById("game").style.display = "block";
 
     gameState = game;
     myPlayerIndex = playerIndex;
     selectedMove = null;
 
-    const gameElement = document.getElementById('game');
-    gameElement.classList.remove('player-blue', 'player-red');
-    gameElement.classList.add(myPlayerIndex === 0 ? 'player-blue' : 'player-red');
+    const gameElement = document.getElementById("game");
+    gameElement.classList.remove("player-blue", "player-red");
+    gameElement.classList.add(myPlayerIndex === 0 ? "player-blue" : "player-red");
 
-    const myColorInfo = document.getElementById('myColorInfo');
+    const myColorInfo = document.getElementById("myColorInfo");
     myColorInfo.innerText = myPlayerIndex === 0
-        ? 'Ты играешь за 🔵 СИНЕГО'
-        : 'Ты играешь за 🔴 КРАСНОГО';
+        ? "Ты играешь за 🔵 СИНЕГО"
+        : "Ты играешь за 🔴 КРАСНОГО";
 
     renderPlayers();
+
     draw();
 }
 
 function renderPlayers() {
-    const div = document.getElementById('playersInfo');
-    const turnText = document.getElementById('status');
+    const div = document.getElementById("playersInfo");
+    const turnText = document.getElementById("status");
 
-    turnText.innerText = gameState.current === 0
-        ? 'Ход: 🔵 Синий'
-        : 'Ход: 🔴 Красный';
+    turnText.innerText =
+        gameState.current === 0
+            ? "Ход: 🔵 Синий"
+            : "Ход: 🔴 Красный";
 
     div.innerHTML = `
-        <div class="player ${gameState.current === 0 ? 'active' : ''}">🔵 Синий</div>
-        <div class="player ${gameState.current === 1 ? 'active' : ''}">🔴 Красный</div>
+        <div class="player ${gameState.current === 0 ? 'active' : ''}">
+            🔵 Синий
+        </div>
+        <div class="player ${gameState.current === 1 ? 'active' : ''}">
+            🔴 Красный
+        </div>
     `;
 }
 
@@ -45,38 +51,42 @@ function updateGame(game, result) {
     draw();
 
     if (result?.winner !== undefined) {
-        const text = result.winner === myPlayerIndex
-            ? '🎉 Ты победил!'
-            : '💀 Ты проиграл';
+        const me = myPlayerIndex;
+        const text = (result.winner === me)
+            ? "🎉 Ты победил!"
+            : "💀 Ты проиграл";
 
-        document.getElementById('status').innerText = text;
+        document.getElementById("status").innerText = text;
     }
 }
 
-const canvas = document.getElementById('board');
-const ctx = canvas.getContext('2d');
+const canvas = document.getElementById("board");
+const ctx = canvas.getContext("2d");
 
-canvas.addEventListener('click', (e) => {
+canvas.addEventListener("click", (e) => {
     if (!gameState) return;
     if (myPlayerIndex === null) return;
     if (gameState.current !== myPlayerIndex) return;
 
     const rect = canvas.getBoundingClientRect();
-    const cellSize = canvas.width / gameState.size;
+    const size = canvas.width / gameState.size;
 
-    const x = Math.floor((e.clientX - rect.left) / cellSize);
-    const y = Math.floor((e.clientY - rect.top) / cellSize);
+    const x = Math.floor((e.clientX - rect.left) / size);
+    const y = Math.floor((e.clientY - rect.top) / size);
 
     const me = gameState.players[myPlayerIndex];
 
-    if (!selectedMove) {
-        const dx = Math.abs(x - me.x);
-        const dy = Math.abs(y - me.y);
-
-        if (Math.max(dx, dy) === 1 && gameState.board[y][x]) {
+    // ЭТАП 1: выбор клетки для хода
+    if (!selectedMove) {␊
+        const dx = Math.abs(x - me.x);␊
+        const dy = Math.abs(y - me.y);␊
+␊
+        if (Math.max(dx, dy) === 1 && gameState.board[y][x]) {␊
             selectedMove = { x, y, fromX: me.x, fromY: me.y };
-        }
-    } else {
+        }␊
+    }␊
+    // ЭТАП 2: удаление клетки
+    else {
         const dist = Math.max(
             Math.abs(x - selectedMove.x),
             Math.abs(y - selectedMove.y)
@@ -84,7 +94,7 @@ canvas.addEventListener('click', (e) => {
 
         if (dist <= 2 && gameState.board[y][x]) {
             ws.send(JSON.stringify({
-                type: 'move',
+                type: "move",
                 moveX: selectedMove.x,
                 moveY: selectedMove.y,
                 removeX: x,
@@ -98,23 +108,23 @@ canvas.addEventListener('click', (e) => {
     draw();
 });
 
-function getAvailableMoves() {
-    const moves = [];
+function getAvailableMoves() {␊
+    const moves = [];␊
     const me = gameState.players[myPlayerIndex];
 
     for (let dx = -1; dx <= 1; dx++) {
         for (let dy = -1; dy <= 1; dy++) {
-            if (dx === 0 && dy === 0) continue;
-
-            const x = me.x + dx;
-            const y = me.y + dy;
-
-            if (
+            if (dx === 0 && dy === 0) continue;␊
+␊
+            const x = me.x + dx;␊
+            const y = me.y + dy;␊
+␊
+            if (␊
                 x >= 0 && x < gameState.size &&
                 y >= 0 && y < gameState.size &&
-                gameState.board[y][x] &&
-                !isOccupied(x, y)
-            ) {
+                gameState.board[y][x] &&␊
+                !isOccupied(x, y)␊
+            ) {␊
                 moves.push({ x, y });
             }
         }
@@ -130,7 +140,7 @@ function getAvailableRemovals(fromX, fromY, fromOldX, fromOldY) {
 
     while (queue.length > 0) {
         const { x, y, steps } = queue.shift();
-        const key = `${x},${y}`;
+        const key = x + "," + y;
 
         if (visited.has(key)) continue;
         visited.add(key);
@@ -148,14 +158,14 @@ function getAvailableRemovals(fromX, fromY, fromOldX, fromOldY) {
                 const nx = x + dx;
                 const ny = y + dy;
 
-                if (
+                if (␊
                     nx >= 0 && nx < gameState.size &&
                     ny >= 0 && ny < gameState.size &&
-                    gameState.board[ny][nx] &&
+                    gameState.board[ny][nx] &&␊
                     !isOccupied(nx, ny, fromOldX, fromOldY)
-                ) {
-                    queue.push({ x: nx, y: ny, steps: steps + 1 });
-                }
+                ) {␊
+                    queue.push({ x: nx, y: ny, steps: steps + 1 });␊
+                }␊
             }
         }
     }
@@ -164,7 +174,7 @@ function getAvailableRemovals(fromX, fromY, fromOldX, fromOldY) {
 }
 
 function isOccupied(x, y, ignoreX = null, ignoreY = null) {
-    return gameState.players.some((p) => {
+    return gameState.players.some(p => {
         if (p.x === ignoreX && p.y === ignoreY) {
             return false;
         }
@@ -174,28 +184,32 @@ function isOccupied(x, y, ignoreX = null, ignoreY = null) {
 }
 
 function draw() {
-    const cellSize = canvas.width / gameState.size;
+    const size = canvas.width / gameState.size;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     for (let y = 0; y < gameState.size; y++) {
         for (let x = 0; x < gameState.size; x++) {
-            if (gameState.board[y][x]) {
-                ctx.fillStyle = '#2ecc71';
-                ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
 
-                ctx.strokeStyle = '#1e8449';
-                ctx.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
+            if (gameState.board[y][x]) {
+                // обычная клетка
+                ctx.fillStyle = "#2ecc71"; // зелёная
+                ctx.fillRect(x * size, y * size, size, size);
+
+                ctx.strokeStyle = "#1e8449";
+                ctx.strokeRect(x * size, y * size, size, size);
             } else {
-                ctx.fillStyle = '#111';
-                ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                // удалённая клетка
+                ctx.fillStyle = "#111";
+                ctx.fillRect(x * size, y * size, size, size);
             }
         }
     }
 
+    // подсветка ходов
     if (!selectedMove) {
-        getAvailableMoves().forEach((c) => {
-            ctx.fillStyle = 'rgba(255,255,0,0.4)';
-            ctx.fillRect(c.x * cellSize, c.y * cellSize, cellSize, cellSize);
+        getAvailableMoves().forEach(c => {
+            ctx.fillStyle = "rgba(255,255,0,0.4)";
+            ctx.fillRect(c.x * size, c.y * size, size, size);
         });
     } else {
         getAvailableRemovals(
@@ -203,20 +217,21 @@ function draw() {
             selectedMove.y,
             selectedMove.fromX,
             selectedMove.fromY
-        ).forEach((c) => {
-            ctx.fillStyle = 'rgba(255,0,0,0.4)';
-            ctx.fillRect(c.x * cellSize, c.y * cellSize, cellSize, cellSize);
+        ).forEach(c => {
+            ctx.fillStyle = "rgba(255,0,0,0.4)";
+            ctx.fillRect(c.x * size, c.y * size, size, size);
         });
     }
 
+    // игроки
     gameState.players.forEach((p, i) => {
-        ctx.fillStyle = i === 0 ? '#3498db' : '#e74c3c';
+        ctx.fillStyle = i === 0 ? "#3498db" : "#e74c3c";
 
         ctx.beginPath();
         ctx.arc(
-            p.x * cellSize + cellSize / 2,
-            p.y * cellSize + cellSize / 2,
-            Math.max(8, cellSize * 0.36),
+            p.x * size + size / 2,
+            p.y * size + size / 2,
+            Math.max(8, size * 0.36),
             0,
             Math.PI * 2
         );
@@ -227,10 +242,10 @@ function draw() {
 function surrenderGame() {
     if (!gameState || myPlayerIndex === null) return;
 
-    const ok = window.confirm('Точно сдаться? Это засчитается как поражение.');
+    const ok = window.confirm("Точно сдаться? Это засчитается как поражение.");
     if (!ok) return;
 
-    ws.send(JSON.stringify({ type: 'surrender' }));
+    ws.send(JSON.stringify({ type: "surrender" }));
 }
 
 window.startGame = startGame;
