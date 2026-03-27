@@ -35,6 +35,26 @@ button:hover {
     transform: scale(1.05);
 }
 
+#playersInfo {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 10px;
+    font-size: 18px;
+}
+
+.player {
+    padding: 10px 15px;
+    border-radius: 10px;
+    background: #333;
+    transition: 0.3s;
+}
+
+.active {
+    background: #f1c40f;
+    color: black;
+    transform: scale(1.1);
+}
+
 canvas {
     border: 3px solid white;
     border-radius: 10px;
