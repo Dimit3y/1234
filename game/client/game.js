@@ -77,14 +77,14 @@ canvas.addEventListener("click", (e) => {
     const me = gameState.players[myPlayerIndex];
 
     // ЭТАП 1: выбор клетки для хода
-    if (!selectedMove) {
-        const dx = Math.abs(x - me.x);
-        const dy = Math.abs(y - me.y);
-
-        if (Math.max(dx, dy) === 1 && gameState.board[y][x]) {
+    if (!selectedMove) {␊
+        const dx = Math.abs(x - me.x);␊
+        const dy = Math.abs(y - me.y);␊
+␊
+        if (Math.max(dx, dy) === 1 && gameState.board[y][x]) {␊
             selectedMove = { x, y, fromX: me.x, fromY: me.y };
-        }
-    }
+        }␊
+    }␊
     // ЭТАП 2: удаление клетки
     else {
         const dist = Math.max(
@@ -108,23 +108,23 @@ canvas.addEventListener("click", (e) => {
     draw();
 });
 
-function getAvailableMoves() {
-    const moves = [];
+function getAvailableMoves() {␊
+    const moves = [];␊
     const me = gameState.players[myPlayerIndex];
 
     for (let dx = -1; dx <= 1; dx++) {
         for (let dy = -1; dy <= 1; dy++) {
-            if (dx === 0 && dy === 0) continue;
-
-            const x = me.x + dx;
-            const y = me.y + dy;
-
-            if (
+            if (dx === 0 && dy === 0) continue;␊
+␊
+            const x = me.x + dx;␊
+            const y = me.y + dy;␊
+␊
+            if (␊
                 x >= 0 && x < gameState.size &&
                 y >= 0 && y < gameState.size &&
-                gameState.board[y][x] &&
-                !isOccupied(x, y)
-            ) {
+                gameState.board[y][x] &&␊
+                !isOccupied(x, y)␊
+            ) {␊
                 moves.push({ x, y });
             }
         }
@@ -158,14 +158,14 @@ function getAvailableRemovals(fromX, fromY, fromOldX, fromOldY) {
                 const nx = x + dx;
                 const ny = y + dy;
 
-                if (
+                if (␊
                     nx >= 0 && nx < gameState.size &&
                     ny >= 0 && ny < gameState.size &&
-                    gameState.board[ny][nx] &&
+                    gameState.board[ny][nx] &&␊
                     !isOccupied(nx, ny, fromOldX, fromOldY)
-                ) {
-                    queue.push({ x: nx, y: ny, steps: steps + 1 });
-                }
+                ) {␊
+                    queue.push({ x: nx, y: ny, steps: steps + 1 });␊
+                }␊
             }
         }
     }

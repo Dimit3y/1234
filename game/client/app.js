@@ -119,7 +119,7 @@ window.onload = () => {
     }
 };
 
-function copyLink() {
+function copyLink() {␊
     if (!currentRoomId) {
         alert("Сначала создай комнату");
         return;
