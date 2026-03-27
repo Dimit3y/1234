@@ -8,19 +8,41 @@
 <div id="menu">
     <h2>Комнаты</h2>
     <div id="connectionStatus">Подключение...</div>
+    <div id="roomSettings">
+        <label>
+            Размер поля:
+            <select id="boardSize">
+                <option value="3">3x3</option>
+                <option value="4">4x4</option>
+                <option value="5">5x5</option>
+                <option value="6">6x6</option>
+                <option value="7" selected>7x7</option>
+                <option value="8">8x8</option>
+                <option value="9">9x9</option>
+                <option value="10">10x10</option>
+            </select>
+        </label>
+        <label>
+            Спавн:
+            <select id="spawnMode">
+                <option value="corners" selected>По углам</option>
+                <option value="random">Рандомный</option>
+            </select>
+        </label>
+    </div>
     <div id="rooms"></div>
     <button onclick="createRoom()">Создать комнату</button>
     <button onclick="copyLink()">Скопировать ссылку</button>
 </div>
 
 <div id="game" style="display:none;">
+    <div id="myColorInfo"></div>
     <div id="playersInfo"></div>
     <canvas id="board" width="350" height="350"></canvas>
     <div id="status"></div>
-    <button onclick="goMenu()">В меню</button>
+    <button id="surrenderBtn" onclick="surrenderGame()">Сдаться</button>
 </div>
 
-<script src="telegram.js"></script>
 <script src="app.js"></script>
 <script src="game.js"></script>
 </body>

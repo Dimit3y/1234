@@ -14,8 +14,52 @@ h2 {
     padding: 20px;
 }
 
+#game {
+    padding: 14px 16px 24px;
+    border-radius: 14px;
+    width: fit-content;
+    margin: 12px auto;
+}
+
+#game.player-blue {
+    background: rgba(52, 152, 219, 0.16);
+}
+
+#game.player-red {
+    background: rgba(231, 76, 60, 0.16);
+}
+
+#myColorInfo {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
 #rooms {
     margin: 20px 0;
+}
+
+#roomSettings {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+
+#roomSettings label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#roomSettings select {
+    padding: 6px 8px;
+    border-radius: 6px;
+}
+
+.room-card {
+    margin: 10px auto;
 }
 
 button {

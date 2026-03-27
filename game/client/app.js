@@ -24,12 +24,20 @@ function connect() {
         }
 
         if (data.type === "startGame") {
-            startGame(data.game);
+            startGame(data.game, data.playerIndex);
         }
 
         if (data.type === "gameOver") {
             if (data.reason === "opponent_left") {
                 document.getElementById("status").innerText = "🎉 Соперник вышел. Ты победил!";
+            }
+
+            if (data.reason === "surrender") {
+                if (data.loser === data.playerIndex) {
+                    document.getElementById("status").innerText = "💀 Ты сдался. Поражение.";
+                } else {
+                    document.getElementById("status").innerText = "🎉 Соперник сдался. Ты победил!";
+                }
             }
         }
 
@@ -50,9 +58,12 @@ function loadRooms() {
 function createRoom() {
     if (ws.readyState !== 1) return alert("Нет соединения");
 
+    const size = Number(document.getElementById("boardSize").value);
+    const spawnMode = document.getElementById("spawnMode").value;
+
     ws.send(JSON.stringify({
         type: "createRoom",
-        name: window.playerName
+        settings: { size, spawnMode }
     }));
 }
 
@@ -63,8 +74,7 @@ function joinRoom(id) {
 
     ws.send(JSON.stringify({
         type: "joinRoom",
-        roomId: id,
-        name: window.playerName
+        roomId: id
     }));
 }
 
@@ -74,10 +84,13 @@ function renderRooms(rooms) {
 
     rooms.forEach(r => {
         const btn = document.createElement("button");
+        btn.className = "room-card";
 
-        const count = r.players ? r.players.length : 0;
+        const count = r.playersCount || 0;
+        const size = r.settings?.size || 7;
+        const spawn = r.settings?.spawnMode === "random" ? "рандом" : "углы";
 
-        btn.innerText = `Комната ${r.id.slice(0, 5)} (${count}/2)`;
+        btn.innerText = `Комната ${r.id.slice(0, 5)} (${count}/2) • ${size}x${size}, ${spawn}`;
 
         btn.onclick = () => joinRoom(r.id);
 
@@ -89,7 +102,12 @@ window.onload = () => {
     connect();
 
     const params = new URLSearchParams(window.location.search);
-    const roomId = params.get("room");
+    const roomIdFromSite = params.get("room");
+    const roomIdFromBot = params.get("startapp") || params.get("tgWebAppStartParam") || params.get("start");
+    const roomIdRaw = roomIdFromSite || roomIdFromBot;
+    const roomId = roomIdRaw && roomIdRaw.startsWith("room_")
+        ? roomIdRaw.slice(5)
+        : roomIdRaw;
 
     if (roomId) {
         const interval = setInterval(() => {
@@ -107,7 +125,7 @@ function copyLink() {
         return;
     }
 
-    const link = window.location.origin + "?room=" + currentRoomId;
+    const link = "https://t.me/Gametg000bot?startapp=room_" + currentRoomId;
 
     navigator.clipboard.writeText(link);
 
