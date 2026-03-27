@@ -2,8 +2,8 @@ function createGame(room) {
     return {
         board: Array(7).fill().map(() => Array(7).fill(1)),
         players: [
-            { x: 0, y: 0 },
-            { x: 6, y: 6 }
+            { x: 0, y: 0, name: room.players[0].name },
+            { x: 6, y: 6, name: room.players[1].name}
         ],
         current: 0,
         removed: []
